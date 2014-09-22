@@ -1,0 +1,8 @@
+{
+  "name": "test-dht11",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "ds18x20": "^0.1.1"
+  }
+}
