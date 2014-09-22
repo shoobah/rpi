@@ -15,6 +15,7 @@ function GetTemp() {
     exec("sudo modprobe w1-gpio", puts);
     exec("sudo modprobe w1-therm", puts);
     lastTemp = 0;
+    this.emit('init',true);
 }
 
 util.inherits(GetTemp, EventEmitter);

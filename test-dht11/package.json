@@ -3,6 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "ds18x20": "^0.1.1"
+    "azure-storage": "^0.3.3",
+    "ds18x20": "^0.1.1",
+    "node-uuid": "^1.4.1"
   }
 }
