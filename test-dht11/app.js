@@ -1,49 +1,33 @@
-var azure = require('azure-storage');
-var uuid = require('node-uuid');
+var Storage = require('./data.js');
 var GetTemp = require('./getTemp.js');
-var gt = new GetTemp();
 
-var tableSvc = azure.createTableService('sensorydata', 'vgxlMPTNh8vDGpufbFKac/JZynYRVAwmo3IvidGElyaU58h340WgpDboteAWSWXtzZLOMeDbZ0Y9FRKdJYau6w==');
+var sensor1 = '/sys/bus/w1/devices/10-000800e45c44/w1_slave';
+var sensor2 = '/sys/bus/w1/devices/10-00080113bb02/w1_slave';
 
-gt.logTemp();
+var sensorList = [{
+    id: '10-000800e45c44',
+    name: 'inne',
+    last: 0
+}, {
+    id: '10-00080113bb02',
+    name: 'ute',
+    last: 0
+}];
+var Gt = new GetTemp(sensorList);
 
-gt.on('driverloaded', function() {
+Gt.on('driverloaded', function() {
     console.log('driver loaded');
 });
 
-gt.on('error', function(err) {
+Gt.on('error', function(err) {
     console.log('ERROR', err);
 });
 
-gt.on('init', function() {
-    tableSvc.createTableIfNotExists('temperature', function(error, result, response) {
-        if (!error) {
-            console.log('The table temperatur was created or it already exists');
-        } else {
-            console.log('Bloody hell!', error);
-        }
-    });
+Gt.on('tempstamp', function(data) {
+    Storage.save('temp', data.sensorName, data);
+    console.log('Saved data: ', data);
 });
 
-gt.on('tempstamp', function(data) {
-        var entGen = azure.TableUtilities.entityGenerator;
-        var item = {
-            PartitionKey: entGen.String('10-000800e45c44'),
-            RowKey: entGen.String(uuid.v4()),
-            temp: entGen.Double(data.temp),
-            time: entGen.String(data.time)
-        };
-        console.log('item', item);
-        tableSvc.insertEntity('temperature', item, function(error, result, response) {
-            if (!error) {
-                console.log('Fucking hell!', error);
-            }
-            if(result){
-                console.log('Result:', result);
-            }
-            if(response){
-                console.log('Response', response);
-            }
-            console.log(data);
-        });
+Storage.init('temp', function() {
+    Gt.logTemp();
 });

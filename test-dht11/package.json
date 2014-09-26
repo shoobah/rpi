@@ -4,7 +4,9 @@
   "private": true,
   "dependencies": {
     "azure-storage": "^0.3.3",
+    "cli-color": "^0.3.2",
     "ds18x20": "^0.1.1",
+    "moment": "^2.8.3",
     "node-uuid": "^1.4.1"
   }
 }
