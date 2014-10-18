@@ -21,40 +21,45 @@ function GetTemp(sensors) {
     EventEmitter.call(this);
     exec("sudo modprobe w1-gpio", puts);
     exec("sudo modprobe w1-therm", puts);
-    lastTemp = 0;
     console.log(clc.green('Init, done'));
 }
 
 util.inherits(GetTemp, EventEmitter);
 
 GetTemp.prototype.readSensor = function(sensor) {
-    var self=this;
+    var self = this;
     var sensorFileName = '/sys/bus/w1/devices/' + sensor.id + '/w1_slave';
     fs.readFile(sensorFileName, 'utf-8', function(err, data) {
         if (err) {
             self.emit('error', err);
         }
-        var temp = data.match(/t=([\d]*)/)[1];
-        var t = 500 * Math.round(parseFloat(temp) / 500) / 1000;
-        var currentTime = Date();
-        if (sensor.last !== t) {
+        var myregexp = /t=([M]{0,1})([\d]*)/i;
+        var match = myregexp.exec(data);
+        if (match !== null) {
+            possibleM = match[1];
+            tmp = parseFloat(match[2]);
+            if (possibleM === 'M') {
+                tmp = tmp * -1;
+            }
+            var t = 500 * Math.round(parseFloat(tmp) / 500) / 1000;
+            var currentTime = Date();
             self.emit('tempstamp', {
                 'sensorName': sensor.name,
                 'RowKey': moment(currentTime).format('YYYY-MM-DD HH:mm:ss.S'),
                 'temp': t
             });
+            sensor.last = t;
         }
-        sensor.last = t;
     });
 };
 
 GetTemp.prototype.logTemp = function() {
-    var self=this;
+    var self = this;
     setInterval(function() {
         sensorList.forEach(function(sensor) {
             self.readSensor(sensor);
         });
-    }, 1000);
+    }, 10000);
 };
 
 module.exports = GetTemp;

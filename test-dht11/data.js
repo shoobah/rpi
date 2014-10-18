@@ -7,7 +7,7 @@ var tableSvc = azure.createTableService('sensorydata', 'vgxlMPTNh8vDGpufbFKac/JZ
 var init = function(table, cb) {
     tableSvc.createTableIfNotExists(table, function(error, result, response) {
         if (!error) {
-            console.log(clc.green('The table temperatur was created or it already exists'));
+            console.log(clc.green('The table ' + table + ' was created or it already exists'));
             cb();
         } else {
             console.log(clc.red('Bloody hell!', error));
@@ -20,7 +20,7 @@ var save = function(table, sensorId, data) {
     var item = {
         PartitionKey: entGen.String(sensorId),
         RowKey: entGen.String(data.RowKey),
-        temp: entGen.Double(data.temp),
+        temp: entGen.String(data.temp),
         //time: entGen.String(data.time)
     };
     tableSvc.insertEntity(table, item, function(error, result, response) {
